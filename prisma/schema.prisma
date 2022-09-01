@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  email     String            @unique
+  hash      String
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  packages  Int
+  stickers  StickerInstance[]
+}
+
+model Sticker {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  firstname   String
+  lastname    String
+  age         Int?
+  birth       String?
+  height      String?
+  weight      String?
+  nationality String
+  photo       String?
+}
+
+model StickerInstance {
+  id        String                @id @default(auto()) @map("_id") @db.ObjectId
+  genId     String
+  stickerId String
+  status    StickerInstanceStatus @default(New)
+  userId    String?
+  User      User?                 @relation(fields: [userId], references: [id])
+
+  @@index([stickerId, userId])
+}
+
+enum StickerInstanceStatus {
+  New
+  Album
+  Swap
+}
