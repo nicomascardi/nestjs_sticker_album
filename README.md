@@ -62,4 +62,13 @@ $ yarn start:dev
 ```
 
 ## Swagger
+
 API documentation will be available at: http://localhost:3000/api/docs
+
+## Prisma Studio
+
+Run prisma studio in port 2323
+
+```bash
+npx prisma studio --port 2323
+```
