@@ -24,6 +24,14 @@
 
 Sticker Album (FIFA World Cup 2018) Backend for learning purposes
 
+## Stack
+
+* Nodejs https://nodejs.org/es/
+* Nestjs https://nestjs.com/
+* Prisma https://www.prisma.io/
+* MongoDB https://www.mongodb.com/
+* Swagger https://swagger.io/
+
 ## Installation
 
 ```bash
