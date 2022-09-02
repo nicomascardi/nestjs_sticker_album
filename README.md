@@ -51,6 +51,7 @@ $ docker-compose exec mongo mongo --eval "rs.initiate({_id: 'rs0', members: [{_i
 Create database and insert the stickers in the database by running the following python script:
 
 ```bash
+$ pip install -r scripts/requirements.txt
 $ python scripts/insert_stickers_in_mongodb.py
 ```
 
