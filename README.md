@@ -35,6 +35,7 @@ Sticker Album (FIFA World Cup 2018) Backend for learning purposes
 ## Installation
 
 ```bash
+$ sudo npm i -g @nestjs/cli
 $ yarn install
 ```
 
@@ -43,20 +44,20 @@ $ yarn install
 Run the following commands to setup mongodb docker container:
 
 ```bash
-docker-compose up -d
-docker-compose exec mongo mongo --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]});"
+$ docker-compose up -d
+$ docker-compose exec mongo mongo --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]});"
 ```
 
 Create database and insert the stickers in the database by running the following python script:
 
 ```bash
-python scripts/insert_stickers_in_mongodb.py
+$ python scripts/insert_stickers_in_mongodb.py
 ```
 
 Create the rest of the schema:
 
 ```bash
-yarn prisma:dev:deploy
+$ yarn prisma:dev:deploy
 ```
 
 ## Running the app
@@ -78,5 +79,5 @@ API documentation will be available at: http://localhost:3000/api/docs
 Run prisma studio in port 2323
 
 ```bash
-npx prisma studio --port 2323
+$ npx prisma studio --port 2323
 ```
