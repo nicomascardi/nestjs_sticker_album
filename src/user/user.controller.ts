@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Logger, Post, UseGuards } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { JwtGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorator';
@@ -10,6 +10,8 @@ import { ApiBearerAuth, ApiForbiddenResponse, ApiOkResponse, ApiTags, ApiUnautho
 @ApiBearerAuth('Authorization')
 @Controller('user')
 export class UserController {
+    private logger: Logger = new Logger('UserController');
+    
     constructor(private userService: UserService){}
 
     @Get('me')
@@ -17,7 +19,7 @@ export class UserController {
     @ApiUnauthorizedResponse({description: 'Unauthorized, provide a valid access_token'})
     @ApiForbiddenResponse({description: 'Forbidden'})
     me(@GetUser() user: User, @GetUser('email') email: string) {
-        console.log(`User ${email} made a GET /user/me request`);
+        this.logger.log(`User ${email} made a GET /user/me request`);
         return user;
     }
 
@@ -26,7 +28,7 @@ export class UserController {
     @ApiUnauthorizedResponse({description: 'Unauthorized, provide a valid access_token'})
     @ApiForbiddenResponse({description: 'Forbidden'})
     data(@GetUser() user: User, @GetUser('email') email: string) {
-        console.log(`User ${email} made a GET /user/data request`);
+        this.logger.log(`User ${email} made a GET /user/data request`);
         return this.userService.getData(user.id);
     }
 
@@ -35,7 +37,7 @@ export class UserController {
     @ApiUnauthorizedResponse({description: 'Unauthorized, provide a valid access_token'})
     @ApiForbiddenResponse({description: 'Forbidden'})
     getPackage(@GetUser() user: User, @GetUser('email') email: string) {
-        console.log(`User ${email} made a GET /user/package request`);
+        this.logger.log(`User ${email} made a GET /user/package request`);
         return this.userService.getPackage(user.id);
     }
 
@@ -45,7 +47,7 @@ export class UserController {
     @ApiUnauthorizedResponse({description: 'Unauthorized, provide a valid access_token'})
     @ApiForbiddenResponse({description: 'Forbidden'})
     addPackage(@GetUser() user: User, @GetUser('email') email: string) {
-        console.log(`User ${email} made a POST /user/package/add request`);
+        this.logger.log(`User ${email} made a POST /user/package/add request`);
         return this.userService.addPackage(user.id);
     }
 }

@@ -5,7 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from "@nestjs/jwt";
 import { UserService } from '../user/user.service';
 import { AuthSignInDto } from './dto';
-
+import { TokenExpiredError }  from 'jsonwebtoken'
+import { User } from '@prisma/client';
 @Injectable()
 export class AuthService {
     constructor(
@@ -13,6 +14,7 @@ export class AuthService {
         private config: ConfigService,
         private userService: UserService
     ) {}
+
     async signup(dto: AuthSignUpDto) {
         const hash = await argon.hash(dto.password);
         const user = await this.userService.create(dto.email, hash);
@@ -33,6 +35,21 @@ export class AuthService {
         }
         return this.signToken(user.id, user.email);
     }
+    
+    async verifyToken(token: string): Promise<User> {
+        try {
+            const decodedToken = await this.jwt.verifyAsync(token, {secret: this.config.get('JWT_SECRET')});
+            const user = await this.userService.getById(decodedToken.sub);
+            if (!user) {
+                throw new ForbiddenException('User has been removed');
+            }
+            return user;
+        } catch(error) {
+            if (error instanceof TokenExpiredError) {
+                throw new ForbiddenException('Token has expired');
+            }
+        }
+    }
 
     async signToken(userId: string, email: string): Promise<{access_token: string}> {
         const payload ={
@@ -43,7 +60,7 @@ export class AuthService {
         const secret = this.config.get('JWT_SECRET');
 
         const token = await this.jwt.signAsync(payload, {
-            expiresIn: '6h',
+            expiresIn: '1h',
             secret
         });
 

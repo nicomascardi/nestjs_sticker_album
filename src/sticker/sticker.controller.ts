@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Logger, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiForbiddenResponse, ApiOkResponse, ApiParam, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from '../auth/decorator';
@@ -11,6 +11,8 @@ import { StickerService } from './sticker.service';
 @ApiBearerAuth('Authorization')
 @Controller('sticker')
 export class StickerController {
+    private logger: Logger = new Logger('StickerController');
+    
     constructor(private stickerService: StickerService) {}
 
     @HttpCode(HttpStatus.OK)
@@ -19,7 +21,7 @@ export class StickerController {
     @ApiUnauthorizedResponse({description: 'Unauthorized, provide a valid access_token'})
     @ApiForbiddenResponse({description: 'Forbidden'})
     putInAlbum(@GetUser() user: User, @GetUser('email') email: string, @Body() dto: StickerInstanceUpdateDto) {
-        console.log(`User ${email} made a POST /sticker/putInAlbum request`);
+        this.logger.log(`User ${email} made a POST /sticker/putInAlbum request`);
         return this.stickerService.updateStickerInstanceStatus(user.id, dto.id, 'Album');
     }
 
@@ -29,7 +31,7 @@ export class StickerController {
     @ApiUnauthorizedResponse({description: 'Unauthorized, provide a valid access_token'})
     @ApiForbiddenResponse({description: 'Forbidden'})
     putInSwap(@GetUser() user: User, @GetUser('email') email: string, @Body() dto: StickerInstanceUpdateDto) {
-        console.log(`User ${email} made a POST /sticker/putInSwap request`);
+        this.logger.log(`User ${email} made a POST /sticker/putInSwap request`);
         return this.stickerService.updateStickerInstanceStatus(user.id, dto.id, 'Swap');
     }
 
@@ -39,7 +41,7 @@ export class StickerController {
     @ApiUnauthorizedResponse({description: 'Unauthorized, provide a valid access_token'})
     @ApiForbiddenResponse({description: 'Forbidden'})
     putInNew(@GetUser() user: User, @GetUser('email') email: string, @Body() dto: StickerInstanceUpdateDto) {
-        console.log(`User ${email} made a POST /sticker/putInNew request`);
+        this.logger.log(`User ${email} made a POST /sticker/putInNew request`);
         return this.stickerService.updateStickerInstanceStatus(user.id, dto.id, 'New');
     }
 }

@@ -1,5 +1,5 @@
-import { ForbiddenException, Injectable, OnModuleInit } from '@nestjs/common';
-import { Sticker, StickerInstance, StickerInstanceStatus } from '@prisma/client';
+import { ForbiddenException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Sticker, StickerInstance, StickerInstanceStatus, Trade } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { StickerInstanceDto } from './dto';
@@ -9,6 +9,7 @@ const PACKAGE_SIZE: number = 5;
 
 @Injectable()
 export class StickerService implements OnModuleInit{
+    private logger: Logger = new Logger('StickerService');
     private stickers: Sticker[];
     
     constructor(private prisma: PrismaService) {}
@@ -17,9 +18,9 @@ export class StickerService implements OnModuleInit{
      * Initilization, gets all possible stickers and put them in cache
      */
     async onModuleInit(): Promise<void> {
-        console.log('Caching stickers...');
+        this.logger.log('Caching stickers...');
         await this.getStickers();
-        console.log(`Stickers found: ${this.stickers.length}`);
+        this.logger.log(`Stickers found: ${this.stickers.length}`);
     }
 
     /**
@@ -108,19 +109,12 @@ export class StickerService implements OnModuleInit{
      * Update the status of a given StickeInstance
      * 
      * @param userId
-     * @param id 
+     * @param stickerInstanceIdd 
      * @param status 
      */
-    async updateStickerInstanceStatus(userId: string, id: string, status: StickerInstanceStatus) {
-        const stickerInstance = await this.prisma.stickerInstance.findUnique({
-            where: { 
-                id
-            }
-        });
-
-        if (stickerInstance === null || stickerInstance.userId !== userId) {
-            throw new ForbiddenException('Sticker does not exist or user has no access');
-        }
+    async updateStickerInstanceStatus(userId: string, stickerInstanceId: string, status: StickerInstanceStatus) {
+        
+        const stickerInstance = await this.validateStickerAccessPermission(userId, stickerInstanceId);
 
         if (stickerInstance.status === 'Album') {
             throw new ForbiddenException('Sticker already in Album');
@@ -136,7 +130,7 @@ export class StickerService implements OnModuleInit{
 
         await this.prisma.stickerInstance.update({
             where: {
-                id
+                id: stickerInstanceId
             },
             data: {
                 status
@@ -144,6 +138,45 @@ export class StickerService implements OnModuleInit{
         });
     }
 
+    /**
+     * Validate StickerInstance existence and if the user owns it
+     * 
+     * @param userId 
+     * @param stickerInstanceId 
+     * @returns 
+     */
+    async validateStickerAccessPermission(userId: string, stickerInstanceId: string) {
+        const stickerInstance = await this.prisma.stickerInstance.findUnique({
+            where: { 
+                id: stickerInstanceId
+            }
+        });
+
+        if (stickerInstance === null || stickerInstance.userId !== userId) {
+            throw new ForbiddenException('Sticker does not exist or user has no access');
+        }
+        return stickerInstance;
+    }
+
+    async swapStickers(sourceUserId: string, sourceStickerInstanceId: string, destinationUserId: string, destinationStickerInstanceId: string) {
+        await this.prisma.stickerInstance.update({
+            where: {
+                id: sourceStickerInstanceId
+            },
+            data: {
+                userId: destinationUserId
+            }
+        });
+
+        await this.prisma.stickerInstance.update({
+            where: {
+                id: destinationStickerInstanceId
+            },
+            data: {
+                userId: sourceUserId
+            }
+        });
+    }
     /**
      * Fill StickerInstancesDto structure
      * 

@@ -43,6 +43,22 @@ model StickerInstance {
   @@index([stickerId, userId])
 }
 
+model Trade {
+  id                        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId                    String
+  associatedTradeId         String?   @unique @db.ObjectId
+  associatedTrade           Trade?    @relation("TradeAssociation", fields: [associatedTradeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  predecessor               Trade?    @relation("TradeAssociation")
+  offerStickerInstanceId    String
+  offerStickerId            String
+  wantStickerId             String
+  receivedStickerInstanceId String?
+  createdAt                 DateTime  @default(now())
+  closedAt                  DateTime?
+  ackedAt                   DateTime?
+  @@index([userId, closedAt])
+}
+
 enum StickerInstanceStatus {
   New
   Album
