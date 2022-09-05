@@ -30,6 +30,7 @@ Sticker Album (FIFA World Cup 2018) Backend for learning purposes
 * Nestjs https://nestjs.com/
 * Prisma https://www.prisma.io/
 * MongoDB https://www.mongodb.com/
+* Socket.IO https://socket.io/
 * Swagger https://swagger.io/
 
 ## Installation
@@ -82,3 +83,19 @@ Run prisma studio in port 2323
 ```bash
 $ npx prisma studio --port 2323
 ```
+
+## Websocket
+
+Trading system is implemented through Socket.IO
+
+You can use Postman to establish a websocket connection at: http://localhost:3000/trading
+
+Provide the auth token (/signin) in the Authorization header
+
+Suported events:
+
+* pullTrades (client->server): ask the server for pending trades. Message body can be empty
+
+* pushTrades (server->client): server response to the client with the pending (not acked) trades
+
+* ackTrade (client->server): client send an ack for received trades. Message body must be the acked trade id (that came in the server message)
