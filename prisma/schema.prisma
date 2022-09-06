@@ -39,7 +39,6 @@ model StickerInstance {
   status    StickerInstanceStatus @default(New)
   userId    String?
   User      User?                 @relation(fields: [userId], references: [id])
-
   @@index([stickerId, userId])
 }
 
