@@ -7,6 +7,12 @@ import { TradeAckDto, TradeIntentDto } from './dto';
 export class TradingService {
     constructor(private prisma: PrismaService, private stickerService: StickerService) {}
     
+    /**
+     * Add a new trade intent, if there is a pending matching trade intent, close it
+     * 
+     * @param userId 
+     * @param dto 
+     */
     async add(userId: string, dto: TradeIntentDto) {
         const stickerInstance = await this.stickerService.validateStickerAccessPermission(userId, dto.offerStickerInstanceId);
 
@@ -68,6 +74,12 @@ export class TradingService {
         }
     }
 
+    /**
+     * Get closed trades that have not been acked by the user yet 
+     * 
+     * @param userId 
+     * @returns 
+     */
     async getNonAckedTradesByUserId(userId: string): Promise<TradeAckDto[]> {
         const tradesDto: TradeAckDto[] = [];
         const trades = await this.prisma.trade.findMany({
@@ -90,6 +102,12 @@ export class TradingService {
         return tradesDto;
     }
 
+    /**
+     * Set a trade as acked
+     * 
+     * @param userId 
+     * @param tradeId 
+     */
     async ackTrade(userId: string, tradeId: string) {
         const trade = await this.prisma.trade.findUnique({
             where: {

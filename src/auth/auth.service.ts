@@ -15,12 +15,24 @@ export class AuthService {
         private userService: UserService
     ) {}
 
+    /**
+     * Sign up user
+     * 
+     * @param dto 
+     * @returns 
+     */
     async signup(dto: AuthSignUpDto) {
         const hash = await argon.hash(dto.password);
         const user = await this.userService.create(dto.email, hash);
         return this.signToken(user.id, user.email);
     }
 
+    /**
+     * Sign in user
+     * 
+     * @param dto 
+     * @returns 
+     */
     async signin(dto: AuthSignInDto) {
         const user = await this.userService.getByEmail(dto.email);
 
@@ -36,6 +48,12 @@ export class AuthService {
         return this.signToken(user.id, user.email);
     }
     
+    /**
+     * Validate jwt token and return user
+     * 
+     * @param token 
+     * @returns 
+     */
     async verifyToken(token: string): Promise<User> {
         try {
             const decodedToken = await this.jwt.verifyAsync(token, {secret: this.config.get('JWT_SECRET')});
@@ -50,7 +68,13 @@ export class AuthService {
             }
         }
     }
-
+    /**
+     * Create jwt token
+     * 
+     * @param userId 
+     * @param email 
+     * @returns 
+     */
     async signToken(userId: string, email: string): Promise<{access_token: string}> {
         const payload ={
             sub: userId,
